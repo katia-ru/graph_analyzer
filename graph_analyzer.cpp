@@ -24,6 +24,7 @@ using std::string;
 using std::vector;
 
 void GraphAnalyzer::Init(const string& filename) {
+  cout << "Parsing graph from " << filename << "\n";
   ifstream file(filename.data());
   if (!file) {
     throw runtime_error("Failed to read graph from file");
@@ -42,29 +43,6 @@ void GraphAnalyzer::Init(const string& filename) {
   file.close();
 }
 
-void GraphAnalyzer::Analyze(
-    const string& cycles_filename,
-    int maximum_cycle_length,
-    const string& maximum_planar_subgraph_filename,
-    const string& maximum_outerplanar_subgraph_filename,
-    const string& thickness_filename,
-    const string& outerthickness_filename) const {
-  if (!cycles_filename.empty() && maximum_cycle_length > 2) {
-    FindCycles(cycles_filename, maximum_cycle_length);
-  }
-  if (!maximum_planar_subgraph_filename.empty()) {
-    FindMaximumPlanarSubgraph(maximum_planar_subgraph_filename);
-  }
-  if (!maximum_outerplanar_subgraph_filename.empty()) {
-    FindMaximumOuterPlanarSubgraph(maximum_outerplanar_subgraph_filename);
-  }
-  if (!thickness_filename.empty()) {
-    FindThickness(thickness_filename);
-  }
-  if (!outerthickness_filename.empty()) {
-    FindOuterThickness(outerthickness_filename);
-  }
-}
 
 void GraphAnalyzer::FindCycles(const string& filename,
                                int maximum_cycle_length) const {
@@ -90,6 +68,7 @@ void GraphAnalyzer::FindCycles(const string& filename,
           }
         } else if (depthes[current_vertex] < maximum_cycle_length) {
           parents[adjacent_vertex] = current_vertex;
+          depthes[adjacent_vertex] = depthes[current_vertex] + 1;
           vertices_queue.push(adjacent_vertex);
         }
       }
@@ -106,18 +85,6 @@ void GraphAnalyzer::FindCycles(const string& filename,
     file << "\n";
   }
   file.close();
-}
-
-void GraphAnalyzer::TryToFormCycle(const vector<int>& parents,
-                                   int vertex,
-                                   set<int>* cycle) const noexcept {
-  while (vertex != -1) {
-    auto result = cycle->insert(vertex);
-    if (!result.second) {
-      break;
-    }
-    vertex = parents[vertex];
-  }
 }
 
 void GraphAnalyzer::FindMaximumPlanarSubgraph(const string& filename) const {
@@ -145,34 +112,6 @@ void GraphAnalyzer::FindMaximumPlanarSubgraph(const string& filename) const {
     for (const auto adjacent_vertex: maximum_planar_subgraph[vertex]) {
       file << vertex << "\t" << adjacent_vertex << "\n";
     }
-  }
-  file.close();
-}
-
-bool GraphAnalyzer::IsPlanar(const set<pair<size_t, size_t>>& edges)
-    const noexcept {
-  typedef adjacency_list<vecS, vecS, bidirectionalS> Graph;
-  Graph testing_graph(graph_.size());
-  for (const auto& edge: edges) {
-    add_edge(edge.first, edge.second, testing_graph);
-  }
-  return boyer_myrvold_planarity_test(testing_graph);
-}
-
-vector<vector<size_t>> GraphAnalyzer::FormGraph(
-    const set<pair<size_t, size_t>>& edges) const noexcept {
-  vector<vector<size_t>> forming_graph(graph_.size(), vector<size_t>());
-  for (const auto& edge: edges) {
-    forming_graph[edge.first].push_back(edge.second);
-  }
-  return forming_graph;
-}
-
-void GraphAnalyzer::FindMaximumOuterPlanarSubgraph(const string& filename)
-    const {
-  ofstream file(filename.data());
-  if (!file) {
-    throw runtime_error("Failed to write maximum outerplanar subgraph");
   }
   file.close();
 }
@@ -215,10 +154,78 @@ void GraphAnalyzer::FindThickness(const string& filename) const {
   file.close();
 }
 
-void GraphAnalyzer::FindOuterThickness(const string& filename) const {
+void GraphAnalyzer::FindDiameter(const string& filename) const {
+  cout << "Finding diameter\n";
+  vector<vector<size_t>> distances = ComputeAllDistances();
+  size_t diameter = 0;
+  for (const auto& adjacency_list: distances) {
+    for (const auto distance: adjacency_list) {
+      if (distance <= graph_.size() && distance > diameter) {
+        diameter = distance;
+      }
+    }
+  }
   ofstream file(filename.data());
   if (!file) {
-    throw runtime_error("Failed to write outerthickness");
+    throw runtime_error("Failed to write diameter");
   }
+  file << diameter << "\n";
   file.close();
+}
+
+void GraphAnalyzer::TryToFormCycle(const vector<int>& parents,
+                                   int vertex,
+                                   set<int>* cycle) const noexcept {
+  while (vertex != -1) {
+    auto result = cycle->insert(vertex);
+    if (!result.second) {
+      break;
+    }
+    vertex = parents[vertex];
+  }
+}
+
+bool GraphAnalyzer::IsPlanar(const set<pair<size_t, size_t>>& edges)
+    const noexcept {
+  typedef adjacency_list<vecS, vecS, bidirectionalS> Graph;
+  Graph testing_graph(graph_.size());
+  for (const auto& edge: edges) {
+    add_edge(edge.first, edge.second, testing_graph);
+  }
+  return boyer_myrvold_planarity_test(testing_graph);
+}
+
+vector<vector<size_t>> GraphAnalyzer::FormGraph(
+    const set<pair<size_t, size_t>>& edges) const noexcept {
+  vector<vector<size_t>> forming_graph(graph_.size(), vector<size_t>());
+  for (const auto& edge: edges) {
+    forming_graph[edge.first].push_back(edge.second);
+  }
+  return forming_graph;
+}
+
+vector<vector<size_t>> GraphAnalyzer::ComputeAllDistances() const noexcept {
+  vector<vector<size_t>> distances(
+      graph_.size(),
+      vector<size_t>(graph_.size(), graph_.size() + 1));
+  for (size_t vertex = 0; vertex < graph_.size(); ++vertex) {
+    for (const auto adjacent_vertex: graph_[vertex]) {
+      distances[vertex][adjacent_vertex] = 1;
+    }
+  }
+  for (size_t vertex = 0; vertex < graph_.size(); ++vertex) {
+    distances[vertex][vertex] = 0;
+  }
+  for (size_t aux_vertex = 0; aux_vertex < graph_.size(); ++aux_vertex) {
+    for (size_t src_vertex = 0; src_vertex < graph_.size(); ++src_vertex) {
+      for (size_t dest_vertex = 0; dest_vertex < graph_.size(); ++dest_vertex) {
+        size_t new_distance = distances[src_vertex][aux_vertex] +
+            distances[aux_vertex][dest_vertex];
+        if (distances[src_vertex][dest_vertex] > new_distance) {
+          distances[src_vertex][dest_vertex] = new_distance;
+        }
+      }
+    }
+  }
+  return distances;
 }

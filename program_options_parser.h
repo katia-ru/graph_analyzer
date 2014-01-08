@@ -10,9 +10,8 @@ class ProgramOptionsParser {
   std::string cycles_filename_ = "";
   int maximum_cycle_length_ = 7;
   std::string maximum_planar_subgraph_filename_ = "";
-  std::string maximum_outerplanar_subgraph_filename_ = "";
   std::string thickness_filename_ = "";
-  std::string outerthickness_filename_ = "";
+  std::string diameter_filename_ = "";
 
  public:
   bool help_message_printed() const noexcept {
@@ -35,15 +34,11 @@ class ProgramOptionsParser {
     return maximum_planar_subgraph_filename_;
   }
 
-  std::string maximum_outerplanar_subgraph_filename() const noexcept {
-    return maximum_outerplanar_subgraph_filename_;
-  }
-
   std::string thickness_filename() const noexcept {
     return thickness_filename_;
   }
 
-  std::string outerthickness_filename() const noexcept {
-    return outerthickness_filename_;
+  std::string diameter_filename() const noexcept {
+    return diameter_filename_;
   }
 };

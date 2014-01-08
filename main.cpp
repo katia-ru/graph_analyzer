@@ -18,13 +18,20 @@ int main(int argc, char** argv) {
     }
     GraphAnalyzer graph_analyzer;
     graph_analyzer.Init(program_options_parser.input_filename());
-    graph_analyzer.Analyze(
-        program_options_parser.cycles_filename(),
-        program_options_parser.maximum_cycle_length(),
-        program_options_parser.maximum_planar_subgraph_filename(),
-        program_options_parser.maximum_outerplanar_subgraph_filename(),
-        program_options_parser.thickness_filename(),
-        program_options_parser.outerthickness_filename());
+    if (!program_options_parser.cycles_filename().empty()) {
+      graph_analyzer.FindCycles(program_options_parser.cycles_filename(),
+                                program_options_parser.maximum_cycle_length());
+    }
+    if (!program_options_parser.maximum_planar_subgraph_filename().empty()) {
+      graph_analyzer.FindMaximumPlanarSubgraph(
+          program_options_parser.maximum_planar_subgraph_filename());
+    }
+    if (!program_options_parser.thickness_filename().empty()) {
+      graph_analyzer.FindThickness(program_options_parser.thickness_filename());
+    }
+    if (!program_options_parser.diameter_filename().empty()) {
+      graph_analyzer.FindDiameter(program_options_parser.diameter_filename());
+    }
   } catch (const exception& except) {
     cerr << "Fatal error occurred: " << except.what() << endl;
     return 1;

@@ -16,7 +16,7 @@ void ProgramOptionsParser::Parse(int argc, char** argv) {
   string configuration_filename = "graph_analyzer.conf";
   options_description program_options_description("Options for program:");
   program_options_description.add_options()
-      ("config_filename, c", value<string>(&configuration_filename),
+      ("config_filename,c", value<string>(&configuration_filename),
           "Configuration file")
       ("help,h", value<bool>(&help_message_printed_)->implicit_value(true),
           "Print help message and exit")
@@ -29,13 +29,10 @@ void ProgramOptionsParser::Parse(int argc, char** argv) {
       ("maximum_planar_subgraph_filename",
           value<string>(&maximum_planar_subgraph_filename_),
           "File where maximum planar subgraph should be written")
-      ("maximum_outerplanar_subgraph_filename",
-          value<string>(&maximum_outerplanar_subgraph_filename_),
-          "File where maximum outerplanar subgraph should be written")
       ("thickness_filename", value<string>(&thickness_filename_),
           "File where thickness value should be written")
-      ("outerthickness_filename", value<string>(&outerthickness_filename_),
-          "File where outerthickness should be written");
+      ("diameter_filename", value<string>(&diameter_filename_),
+          "File where diameter of graph should be written");
   store(parse_command_line(argc, argv, program_options_description),
         program_options_storage);
   notify(program_options_storage);
