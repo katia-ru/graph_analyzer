@@ -2,6 +2,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/boyer_myrvold_planar_test.hpp>
 #include <boost/graph/graph_traits.hpp>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <queue>
@@ -189,6 +190,23 @@ void GraphAnalyzer::FindWinerIndex(const string& filename) const {
     throw runtime_error("Failed to write Winer index");
   }
   file << winer_index << "\n";
+  file.close();
+}
+
+void GraphAnalyzer::FindRandichIndex(const string& filename) const {
+  cout << "Finding Randich index\n";
+  double randich_index = 0.0;
+  for (size_t vertex = 0; vertex < graph_.size(); ++vertex) {
+    for (const auto adjacent_vertex: graph_[vertex]) {
+      randich_index += 1.0 / sqrt(static_cast<double>(graph_[vertex].size())) *
+          1.0 / sqrt(static_cast<double>(graph_[adjacent_vertex].size()));
+    }
+  }
+  ofstream file(filename.data());
+  if (!file) {
+    throw runtime_error("Failed to write Randich index");
+  }
+  file << randich_index << "\n";
   file.close();
 }
 

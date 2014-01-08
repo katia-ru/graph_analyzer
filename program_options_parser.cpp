@@ -34,7 +34,9 @@ void ProgramOptionsParser::Parse(int argc, char** argv) {
       ("diameter_filename", value<string>(&diameter_filename_),
           "File where diameter of graph should be written")
       ("winer_index_filename", value<string>(&winer_index_filename_),
-          "File where Winer index should be written");
+          "File where Winer index should be written")
+      ("randich_index_filename", value<string>(&randich_index_filename_),
+          "File where Randich index should be written");
   store(parse_command_line(argc, argv, program_options_description),
         program_options_storage);
   notify(program_options_storage);

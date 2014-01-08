@@ -24,6 +24,8 @@ class GraphAnalyzer {
 
   void FindWinerIndex(const std::string& filename) const;
 
+  void FindRandichIndex(const std::string& filename) const;
+
  private:
   void TryToFormCycle(const std::vector<int>& parents,
                       int vertex,

@@ -36,6 +36,10 @@ int main(int argc, char** argv) {
       graph_analyzer.FindWinerIndex(
           program_options_parser.winer_index_filename());
     }
+    if (!program_options_parser.randich_index_filename().empty()) {
+      graph_analyzer.FindRandichIndex(
+          program_options_parser.randich_index_filename());
+    }
   } catch (const exception& except) {
     cerr << "Fatal error occurred: " << except.what() << endl;
     return 1;
