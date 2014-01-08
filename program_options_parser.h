@@ -15,8 +15,12 @@ class ProgramOptionsParser {
   std::string outerthickness_filename_ = "";
 
  public:
-  bool help_message_printed() const {
+  bool help_message_printed() const noexcept {
     return help_message_printed_;
+  }
+
+  std::string input_filename() const noexcept {
+    return input_filename_;
   }
 
   std::string cycles_filename() const noexcept {
