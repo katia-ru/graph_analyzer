@@ -160,7 +160,7 @@ void GraphAnalyzer::FindDiameter(const string& filename) const {
   size_t diameter = 0;
   for (const auto& adjacency_list: distances) {
     for (const auto distance: adjacency_list) {
-      if (distance <= graph_.size() && distance > diameter) {
+      if (distance < kInfinity_ && distance > diameter) {
         diameter = distance;
       }
     }
@@ -170,6 +170,25 @@ void GraphAnalyzer::FindDiameter(const string& filename) const {
     throw runtime_error("Failed to write diameter");
   }
   file << diameter << "\n";
+  file.close();
+}
+
+void GraphAnalyzer::FindWinerIndex(const string& filename) const {
+  cout << "Finding Winer index\n";
+  vector<vector<size_t>> distances = ComputeAllDistances();
+  size_t winer_index = 0;
+  for (const auto& adjacency_list: distances) {
+    for (const auto distance: adjacency_list) {
+      if (distance < kInfinity_) {
+        winer_index += distance;
+      }
+    }
+  }
+  ofstream file(filename.data());
+  if (!file) {
+    throw runtime_error("Failed to write Winer index");
+  }
+  file << winer_index << "\n";
   file.close();
 }
 
@@ -205,9 +224,8 @@ vector<vector<size_t>> GraphAnalyzer::FormGraph(
 }
 
 vector<vector<size_t>> GraphAnalyzer::ComputeAllDistances() const noexcept {
-  vector<vector<size_t>> distances(
-      graph_.size(),
-      vector<size_t>(graph_.size(), graph_.size() + 1));
+  vector<vector<size_t>> distances(graph_.size(),
+                                   vector<size_t>(graph_.size(), kInfinity_));
   for (size_t vertex = 0; vertex < graph_.size(); ++vertex) {
     for (const auto adjacent_vertex: graph_[vertex]) {
       distances[vertex][adjacent_vertex] = 1;
@@ -219,10 +237,11 @@ vector<vector<size_t>> GraphAnalyzer::ComputeAllDistances() const noexcept {
   for (size_t aux_vertex = 0; aux_vertex < graph_.size(); ++aux_vertex) {
     for (size_t src_vertex = 0; src_vertex < graph_.size(); ++src_vertex) {
       for (size_t dest_vertex = 0; dest_vertex < graph_.size(); ++dest_vertex) {
-        size_t new_distance = distances[src_vertex][aux_vertex] +
+        unsigned long long new_distance = distances[src_vertex][aux_vertex] +
             distances[aux_vertex][dest_vertex];
         if (distances[src_vertex][dest_vertex] > new_distance) {
-          distances[src_vertex][dest_vertex] = new_distance;
+          distances[src_vertex][dest_vertex] =
+              static_cast<size_t>(new_distance);
         }
       }
     }

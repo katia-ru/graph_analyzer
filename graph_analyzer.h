@@ -1,3 +1,4 @@
+#include <limits>
 #include <set>
 #include <string>
 #include <utility>
@@ -9,6 +10,7 @@ class GraphAnalyzer {
   void Init(const std::string& graph_filename);
 
  private:
+  const size_t kInfinity_ = std::numeric_limits<int>::max();
   std::vector<std::vector<size_t>> graph_;
 
  public:
@@ -19,6 +21,8 @@ class GraphAnalyzer {
   void FindThickness(const std::string& filename) const;
 
   void FindDiameter(const std::string& filename) const;
+
+  void FindWinerIndex(const std::string& filename) const;
 
  private:
   void TryToFormCycle(const std::vector<int>& parents,

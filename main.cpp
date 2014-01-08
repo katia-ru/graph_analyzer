@@ -32,6 +32,10 @@ int main(int argc, char** argv) {
     if (!program_options_parser.diameter_filename().empty()) {
       graph_analyzer.FindDiameter(program_options_parser.diameter_filename());
     }
+    if (!program_options_parser.winer_index_filename().empty()) {
+      graph_analyzer.FindWinerIndex(
+          program_options_parser.winer_index_filename());
+    }
   } catch (const exception& except) {
     cerr << "Fatal error occurred: " << except.what() << endl;
     return 1;
