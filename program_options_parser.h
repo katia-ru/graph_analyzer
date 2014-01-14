@@ -14,7 +14,7 @@ class ProgramOptionsParser {
   std::string diameter_filename_ = "";
   std::string winer_index_filename_ = "";
   std::string randich_index_filename_ = "";
-  std::string average_length_filename_ = "";
+  std::string average_path_length_filename_ = "";
 
  public:
   bool help_message_printed() const noexcept {
@@ -53,6 +53,7 @@ class ProgramOptionsParser {
     return randich_index_filename_;
   }
 
-  std::string average_length_filename() const noexcept {
-    return average_length_filename_;
+  std::string average_path_length_filename() const noexcept {
+    return average_path_length_filename_;
+  }
 };

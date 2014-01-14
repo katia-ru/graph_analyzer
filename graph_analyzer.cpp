@@ -174,20 +174,24 @@ void GraphAnalyzer::FindDiameter(const string& filename) const {
   file.close();
 }
 
-void GraphAnalyzer::FindAverageLength(const string& filename) const {
-  cout << "Finding average length\n";
+void GraphAnalyzer::FindAveragePathLength(const string& filename) const {
+  cout << "Finding average path length\n";
   vector<vector<size_t>> distances = ComputeAllDistances();
-  double average_length = 0.0;
+  size_t average_path_length = 0.0;
   for (const auto& adjacency_list: distances) {
     for (const auto& distance: adjacency_list) {
-      average_length += distance;
+      if (distance < kInfinity_) {
+        average_path_length += distance;
+      }
     }
   }
   ofstream file(filename.data());
   if (!file) {
     throw runtime_error("Failed to write average path length");
   }
-  file << average_path_length << "\n";
+  file << static_cast<double>(average_path_length) /
+      (static_cast<double>(graph_.size()) *
+       static_cast<double>(graph_.size() - 1))  << "\n";
   file.close();
 }
 
