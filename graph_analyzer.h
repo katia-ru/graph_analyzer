@@ -33,6 +33,9 @@ class GraphAnalyzer {
                       int vertex,
                       std::set<int>* cycle) const noexcept;
 
+  std::set<std::pair<size_t, size_t>> FindMaximumPlanarSubgraph(
+      const std::set<std::pair<size_t, size_t>>& edges) const noexcept;
+
   bool IsPlanar(const std::set<std::pair<size_t, size_t>>& edges)
       const noexcept;
 

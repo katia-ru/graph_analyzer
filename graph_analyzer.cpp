@@ -110,7 +110,6 @@ void GraphAnalyzer::FindCycles(const string& filename,
 
 void GraphAnalyzer::FindMaximumPlanarSubgraph(const string& filename) const {
   cout << "Finding maximum planar subgraph\n";
-  set<pair<size_t, size_t>> forming_edges;
   set<pair<size_t, size_t>> edges;
   for (size_t vertex = 0; vertex < graph_.size(); ++vertex) {
     for (const auto adjacent_vertex: graph_[vertex]) {
@@ -118,15 +117,10 @@ void GraphAnalyzer::FindMaximumPlanarSubgraph(const string& filename) const {
                              max(vertex, adjacent_vertex)));
     }
   }
-  while (edges.size() > 0) {
-    pair<size_t, size_t> edge = *edges.begin();
-    forming_edges.insert(edge);
-    edges.erase(edges.begin());
-    if (!IsPlanar(forming_edges)) {
-      forming_edges.erase(edge);
-    }
-  }
-  vector<vector<size_t>> maximum_planar_subgraph = FormGraph(forming_edges);
+  set<pair<size_t, size_t>> maximum_planar_subgraph_edges =
+      FindMaximumPlanarSubgraph(edges);
+  vector<vector<size_t>> maximum_planar_subgraph = FormGraph(
+      maximum_planar_subgraph_edges);
   ofstream file(filename.data());
   if (!file) {
     throw runtime_error("Failed to write found maximum planar subgraph");
@@ -150,20 +144,13 @@ void GraphAnalyzer::FindThickness(const string& filename) const {
     }
   }
   while (edges.size() > 0) {
-    set<pair<size_t, size_t>> current_edges(edges.begin(), edges.end());
-    set<pair<size_t, size_t>> forming_edges;
-    while (current_edges.size() > 0) {
-      pair<size_t, size_t> edge = *current_edges.begin();
-      forming_edges.insert(edge);
-      current_edges.erase(current_edges.begin());
-      if (!IsPlanar(forming_edges)) {
-        forming_edges.erase(edge);
-      }
-    }
-    for (const auto& edge: forming_edges) {
+    set<pair<size_t, size_t>> maximum_planar_subgraph_edges =
+        FindMaximumPlanarSubgraph(edges);
+    for (const auto& edge: maximum_planar_subgraph_edges) {
       edges.erase(edge);
     }
-    thickness_edges.insert(forming_edges.begin(), forming_edges.end());
+    thickness_edges.insert(maximum_planar_subgraph_edges.begin(),
+                           maximum_planar_subgraph_edges.end());
   }
   vector<vector<size_t>> thickness = FormGraph(thickness_edges);
   ofstream file(filename.data());
@@ -264,6 +251,21 @@ void GraphAnalyzer::TryToFormCycle(const vector<int>& parents,
     }
     vertex = parents[vertex];
   }
+}
+
+set<pair<size_t, size_t>> GraphAnalyzer::FindMaximumPlanarSubgraph(
+    const set<pair<size_t, size_t>>& edges) const noexcept {
+  set<pair<size_t, size_t>> current_edges(edges.begin(), edges.end());
+  set<pair<size_t, size_t>> maximum_planar_subgraph_edges;
+  while (current_edges.size() > 0) {
+    pair<size_t, size_t> edge = *current_edges.begin();
+    maximum_planar_subgraph_edges.insert(edge);
+    current_edges.erase(current_edges.begin());
+    if (!IsPlanar(maximum_planar_subgraph_edges)) {
+      maximum_planar_subgraph_edges.erase(edge);
+    }
+  }
+  return maximum_planar_subgraph_edges;
 }
 
 bool GraphAnalyzer::IsPlanar(const set<pair<size_t, size_t>>& edges)
