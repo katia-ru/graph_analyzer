@@ -1,7 +1,9 @@
 #include "./graph_analyzer.h"
+#include <boost/algorithm/string.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/boyer_myrvold_planar_test.hpp>
 #include <boost/graph/graph_traits.hpp>
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -14,8 +16,14 @@
 
 using namespace boost;
 using std::cout;
+using std::getline;
+using std::find_if;
 using std::ifstream;
+using std::isspace;
 using std::make_pair;
+using std::max;
+using std::not1;
+using std::ptr_fun;
 using std::ofstream;
 using std::pair;
 using std::queue;
@@ -30,16 +38,27 @@ void GraphAnalyzer::Init(const string& filename) {
   if (!file) {
     throw runtime_error("Failed to read graph from file");
   }
-  size_t number_vertices;
-  size_t number_edges;
-  file >> number_vertices >> number_edges;
-  graph_.resize(number_vertices, vector<size_t>());
-  for (size_t edge = 0; edge < number_edges; ++edge) {
-    size_t source_vertex;
-    size_t destination_vertex;
-    file >> source_vertex >> destination_vertex;
-    graph_[source_vertex].push_back(destination_vertex);
-    graph_[destination_vertex].push_back(source_vertex);
+  string line;
+  while (!file.eof()) {
+    getline(file, line);
+    line.erase(find_if(line.rbegin(),
+                       line.rend(),
+                       not1(ptr_fun<int, int>(isspace))).base(),
+               line.end());
+    if (!line.empty()) {
+      vector<string> tokens;
+      split(tokens, line, is_any_of("\t "));
+      if (tokens.size() == 2) {
+        size_t source_vertex = stoi(tokens[0]);
+        size_t destination_vertex = stoi(tokens[1]);
+        size_t max_vertex = max(destination_vertex, source_vertex);
+        if (graph_.size() < max_vertex + 1) {
+          graph_.resize(max_vertex + 1, vector<size_t>());
+        }
+        graph_[source_vertex].push_back(destination_vertex);
+        graph_[destination_vertex].push_back(source_vertex);
+      }
+    }
   }
   file.close();
 }
