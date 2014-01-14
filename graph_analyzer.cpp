@@ -22,6 +22,7 @@ using std::ifstream;
 using std::isspace;
 using std::make_pair;
 using std::max;
+using std::min;
 using std::not1;
 using std::ptr_fun;
 using std::ofstream;
@@ -108,11 +109,13 @@ void GraphAnalyzer::FindCycles(const string& filename,
 }
 
 void GraphAnalyzer::FindMaximumPlanarSubgraph(const string& filename) const {
+  cout << "Finding maximum planar subgraph\n";
   set<pair<size_t, size_t>> forming_edges;
   set<pair<size_t, size_t>> edges;
   for (size_t vertex = 0; vertex < graph_.size(); ++vertex) {
     for (const auto adjacent_vertex: graph_[vertex]) {
-      edges.insert(make_pair(vertex, adjacent_vertex));
+      edges.insert(make_pair(min(vertex, adjacent_vertex),
+                             max(vertex, adjacent_vertex)));
     }
   }
   while (edges.size() > 0) {
@@ -142,7 +145,8 @@ void GraphAnalyzer::FindThickness(const string& filename) const {
   set<pair<size_t, size_t>> edges;
   for (size_t vertex = 0; vertex < graph_.size(); ++vertex) {
     for (const auto adjacent_vertex: graph_[vertex]) {
-      edges.insert(make_pair(vertex, adjacent_vertex));
+      edges.insert(make_pair(min(vertex, adjacent_vertex),
+                             max(vertex, adjacent_vertex)));
     }
   }
   while (edges.size() > 0) {
@@ -264,7 +268,10 @@ void GraphAnalyzer::TryToFormCycle(const vector<int>& parents,
 
 bool GraphAnalyzer::IsPlanar(const set<pair<size_t, size_t>>& edges)
     const noexcept {
-  typedef adjacency_list<vecS, vecS, bidirectionalS> Graph;
+  typedef adjacency_list<vecS,
+                         vecS,
+                         undirectedS,
+                         property<vertex_index_t, size_t>> Graph;
   Graph testing_graph(graph_.size());
   for (const auto& edge: edges) {
     add_edge(edge.first, edge.second, testing_graph);
