@@ -17,7 +17,7 @@ void ProgramOptionsParser::Parse(int argc, char** argv) {
   options_description program_options_description("Options for program:");
   program_options_description.add_options()
       ("config_filename,c", value<string>(&configuration_filename),
-          "Configuration file")
+  		     "Configuration file")
       ("help,h", value<bool>(&help_message_printed_)->implicit_value(true),
           "Print help message and exit")
       ("input_filename", value<string>(&input_filename_),
@@ -36,7 +36,10 @@ void ProgramOptionsParser::Parse(int argc, char** argv) {
       ("winer_index_filename", value<string>(&winer_index_filename_),
           "File where Winer index should be written")
       ("randich_index_filename", value<string>(&randich_index_filename_),
-          "File where Randich index should be written");
+          "File where Randich index should be written")
+		 ("average_path_length_filename",
+          value<string>(&average_path_length_filename_),
+          "File where average path length should be written");
   store(parse_command_line(argc, argv, program_options_description),
         program_options_storage);
   notify(program_options_storage);

@@ -40,6 +40,10 @@ int main(int argc, char** argv) {
       graph_analyzer.FindRandichIndex(
           program_options_parser.randich_index_filename());
     }
+    if (!program_options_parser.average_length_filename().empty()) {
+      graph_analyzer.FindAverageLength(
+          program_options_parser.average_length_filename());
+    }
   } catch (const exception& except) {
     cerr << "Fatal error occurred: " << except.what() << endl;
     return 1;

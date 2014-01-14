@@ -26,6 +26,8 @@ class GraphAnalyzer {
 
   void FindRandichIndex(const std::string& filename) const;
 
+  void FindAverageLength(const std::string& filename) const;
+
  private:
   void TryToFormCycle(const std::vector<int>& parents,
                       int vertex,
