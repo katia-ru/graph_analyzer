@@ -68,7 +68,7 @@ void GraphAnalyzer::Init(const string& filename) {
 void GraphAnalyzer::FindCycles(const string& filename,
                                int maximum_cycle_length) const {
   cout << "Finding cycles\n";
-  set<vector<int>> cycles;
+  set<set<int>> cycles;
   for (size_t vertex = 0; vertex < graph_.size(); ++vertex) {
     vector<int> depthes(graph_.size(), 0);
     vector<int> parents(graph_.size(), -1);
@@ -84,11 +84,8 @@ void GraphAnalyzer::FindCycles(const string& filename,
           TryToFormCycle(parents, adjacent_vertex, &cycle);
           TryToFormCycle(parents, current_vertex, &cycle);
           if (cycle.size() > 2 &&
-              cycle.size() < static_cast<size_t>(maximum_cycle_length)) {
-            cycles.insert(FormConnectedCycle(current_vertex,
-                                             adjacent_vertex,
-                                             cycle.size(),
-                                             parents));
+              cycle.size() <= static_cast<size_t>(maximum_cycle_length)) {
+            cycles.insert(cycle);
           }
         } else if (depthes[current_vertex] < maximum_cycle_length) {
           parents[adjacent_vertex] = current_vertex;
