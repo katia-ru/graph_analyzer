@@ -84,7 +84,7 @@ void GraphAnalyzer::FindCycles(const string& filename,
           TryToFormCycle(parents, adjacent_vertex, &cycle);
           TryToFormCycle(parents, current_vertex, &cycle);
           if (cycle.size() > 2 &&
-              cycle.size() < static_cast<size_t>(maximum_cycle_length)) {
+              cycle.size() <= static_cast<size_t>(maximum_cycle_length)) {
             cycles.insert(cycle);
           }
         } else if (depthes[current_vertex] < maximum_cycle_length) {
@@ -246,10 +246,11 @@ void GraphAnalyzer::TryToFormCycle(const vector<int>& parents,
                                    set<int>* cycle) const noexcept {
   while (vertex != -1) {
     auto result = cycle->insert(vertex);
-    if (!result.second) {
-      break;
-    }
     vertex = parents[vertex];
+    if (!result.second && vertex != -1) {
+      cycle->clear();
+      return;
+    }
   }
 }
 
