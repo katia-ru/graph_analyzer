@@ -69,6 +69,7 @@ void GraphAnalyzer::FindCycles(const string& filename,
                                int maximum_cycle_length) const {
   cout << "Finding cycles\n";
   set<set<int>> cycles;
+  vector<vector<int>> connected_cycles;
   for (size_t vertex = 0; vertex < graph_.size(); ++vertex) {
     vector<int> depthes(graph_.size(), 0);
     vector<int> parents(graph_.size(), -1);
@@ -85,7 +86,13 @@ void GraphAnalyzer::FindCycles(const string& filename,
           TryToFormCycle(parents, current_vertex, &cycle);
           if (cycle.size() > 2 &&
               cycle.size() <= static_cast<size_t>(maximum_cycle_length)) {
-            cycles.insert(cycle);
+            auto result = cycles.insert(cycle);
+            if (result.second) {
+              connected_cycles.push_back(FormConnectedCycle(current_vertex,
+                                                            adjacent_vertex,
+                                                            cycle.size(),
+                                                            parents));
+            }
           }
         } else if (depthes[current_vertex] < maximum_cycle_length) {
           parents[adjacent_vertex] = current_vertex;
@@ -99,7 +106,7 @@ void GraphAnalyzer::FindCycles(const string& filename,
   if (!file) {
     throw runtime_error("Failed to write cycles");
   }
-  for (const auto& cycle: cycles) {
+  for (const auto& cycle: connected_cycles) {
     for (const auto vertex: cycle) {
       file << vertex << "\t";
     }
@@ -252,6 +259,25 @@ void GraphAnalyzer::TryToFormCycle(const vector<int>& parents,
       return;
     }
   }
+}
+
+vector<int> GraphAnalyzer::FormConnectedCycle(int vertex,
+                                              int adjacent_vertex,
+                                              int cycle_size,
+                                              const vector<int>& parents)
+                                              const noexcept {
+  vector<int> new_cycle(cycle_size);
+  int cycle_vertex = adjacent_vertex;
+  for (int index = 0; cycle_vertex != -1; ++index) {
+    new_cycle[index] = cycle_vertex;
+    cycle_vertex = parents[cycle_vertex];
+  }
+  cycle_vertex = vertex;
+  for (int index = cycle_size - 1; cycle_vertex != -1; --index) {
+    new_cycle[index] = cycle_vertex;
+    cycle_vertex = parents[cycle_vertex];
+  }
+  return new_cycle;
 }
 
 set<pair<size_t, size_t>> GraphAnalyzer::FindMaximumPlanarSubgraph(
