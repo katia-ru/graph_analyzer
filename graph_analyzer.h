@@ -33,6 +33,12 @@ class GraphAnalyzer {
                       int vertex,
                       std::set<int>* cycle) const noexcept;
 
+  std::vector<int> FormConnectedCycle(int vertex,
+                                      int adjacent_vertex,
+                                      int cycle_size,
+                                      const std::vector<int>& parents)
+                                      const noexcept;
+
   std::set<std::pair<size_t, size_t>> FindMaximumPlanarSubgraph(
       const std::set<std::pair<size_t, size_t>>& edges) const noexcept;
 
