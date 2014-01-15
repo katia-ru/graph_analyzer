@@ -249,10 +249,11 @@ void GraphAnalyzer::TryToFormCycle(const vector<int>& parents,
                                    set<int>* cycle) const noexcept {
   while (vertex != -1) {
     auto result = cycle->insert(vertex);
-    if (!result.second) {
-      break;
-    }
     vertex = parents[vertex];
+    if (!result.second && vertex != -1) {
+      cycle->clear();
+      return;
+    }
   }
 }
 
